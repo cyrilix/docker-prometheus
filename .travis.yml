@@ -3,14 +3,17 @@ env:
   - IMAGE_NAME=prometheus
   - VERSION=2.6.0
   - DOCKER_CLI_EXPERIMENTAL := enabled
-  matrix:
   - secure: wOuF5u0C3+0CBr5MFirPjG38Oat3f0TkXxP98Io5jul2OxHda4WwdSAu5ZVjP5rRVVscDQYwyoKNPDVWiVIrMmggvfuqyib3+zxWcG6pfquND9scbXlOs9biSidNFkTNTnlCOByOBPKOdmwuy066JL628fvBUdQG4dSgri617sbapldwDvUJGqk2zSXW93J3PWdYfLA4yW0aZtDgel27qGiZu6KN+BSnYV53eO8YJoVpxZTmpr7qOzOflIT0hdB7R5bz4xCgF3ruKnADtvBU0JECBJ83XeeXhccdrr+FBtYbMfmvRoyYqmGNSlqe56Tl5ZhwU7R9k3zlQGd9moito0QoqgTOO1Wf7R4T7+g/4lOqm0p/X9Vm0dyxHwRVMaaP5oDYqJByaNkRGoXTfdY8uhct79coj3/rDeBoM4tCvjOLXm/CEUyPIMA1g8X0+N79bC2gVerwaOviSXLZTAEbyQ+0YgjOdKicUo6lJKPF+Xj8PmfyNcN6uxj0Bk9qx7Km9+sEiLsi0gLgoEPb+gy++3x36b4LC3J6WcPZoo3Yp6kkxnqQjQugYZPdJTAfgkXJ6wpIwXQlCaTysu3o5dd/7P0hBOeL5EfaZMBdmH1VX0GK2HO1YWtaHcfHHuY0M/yTupOFGALWflnDpe01gA2h+wVWCm11q7HiibHdp9byZ3A=
+
 sudo: required
 services:
 - docker
-language: golang
+
+language: bash
+
 script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
 - for target_arch in aarch64 arm x86_64; do wget -N https://github.com/multiarch/qemu-user-static/releases/download/v2.9.1-1/x86_64_qemu-${target_arch}-static.tar.gz;
   tar -xvf x86_64_qemu-${target_arch}-static.tar.gz; done
 - git clone git clone https://github.com/prometheus/prometheus.git
