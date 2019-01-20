@@ -1,7 +1,8 @@
 #! /bin/bash
 
 IMG_NAME=cyrilix/prometheus
-VERSION=2.6.0
+VERSION=2.6.1
+MAJOR_VERSION=2.6
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
 set -e
@@ -32,8 +33,10 @@ build_and_push_images() {
 
     docker build --file "${dockerfile}" --tag "${IMG_NAME}:${arch}-latest" .
     docker tag "${IMG_NAME}:${arch}-latest" "${IMG_NAME}:${arch}-${VERSION}"
+    docker tag "${IMG_NAME}:${arch}-latest" "${IMG_NAME}:${arch}-${MAJOR_VERSION}"
     docker push "${IMG_NAME}:${arch}-latest"
     docker push "${IMG_NAME}:${arch}-${VERSION}"
+    docker push "${IMG_NAME}:${arch}-${MAJOR_VERSION}"
 }
 
 
@@ -41,9 +44,14 @@ build_manifests() {
     docker -D manifest create "${IMG_NAME}:${VERSION}" "${IMG_NAME}:amd64-${VERSION}" "${IMG_NAME}:arm-${VERSION}"
     docker -D manifest annotate "${IMG_NAME}:${VERSION}" "${IMG_NAME}:arm-${VERSION}" --os=linux --arch=arm --variant=v6
     docker -D manifest push "${IMG_NAME}:${VERSION}"
+
     docker -D manifest create "${IMG_NAME}:latest" "${IMG_NAME}:amd64-latest" "${IMG_NAME}:arm-latest"
     docker -D manifest annotate "${IMG_NAME}:latest" "${IMG_NAME}:arm-latest" --os=linux --arch=arm --variant=v6
     docker -D manifest push "${IMG_NAME}:latest"
+
+    docker -D manifest create "${IMG_NAME}:${MAJOR_VERSION}" "${IMG_NAME}:amd64-${MAJOR_VERSION}" "${IMG_NAME}:arm-${MAJOR_VERSION}"
+    docker -D manifest annotate "${IMG_NAME}:${MAJOR_VERSION}" "${IMG_NAME}:arm-${MAJOR_VERSION}" --os=linux --arch=arm --variant=v6
+    docker -D manifest push "${IMG_NAME}:${MAJOR_VERSION}"
 }
 
 fetch_sources
@@ -54,7 +62,7 @@ echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 GOOS=linux GOARCH=amd64 make build
 build_and_push_images amd64 ./Dockerfile
 
-sed "s#FROM \+\(.*\)#FROM arm32v6/busybox\n\nCOPY qemu-*-static /usr/bin/\n#" Dockerfile > Dockerfile.arm
+sed "s#FROM \+\(.*\)#FROM arm32v6/busybox\n\nCOPY qemu-arm-static /usr/bin/\n#" Dockerfile > Dockerfile.arm
 GOOS=linux GOARCH=arm GOARM=6 make build
 build_and_push_images arm ./Dockerfile.arm
 
